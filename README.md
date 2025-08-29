@@ -19,7 +19,7 @@
 
 ## Creating Cross-validation Folds :
 - Creating and using same cross-validation folds throughout to prevent any overfitting.
-- Creating 5 folds using "KFold" and mentioning the validation folds in a separate column "kfold".
+- Creating 5 folds using "KFold" and mentioning the validation folds in a separate column "kfold" having value from 0 - 4.
 
 ![Image](https://github.com/user-attachments/assets/9be1e413-7848-41df-b90c-733fd5c8a0ab)
 
@@ -51,41 +51,44 @@
 - Flag features have been created for each of "MasVnrArea", "GarageYrBlt" and "LotFrontage" indicating position of missing values in them by "1" for missing and "0" for not missing.
 
 ## Feature Engineering:
-- Extracted a repeating pattern of data out of the unique ticket details of all the passengers onboard in "Ticket" column and created a new categorical feature named "ticket_type".
-- Different "ticket_type" values showing different "Survival" probabilities for passengers.
-![Image](https://github.com/user-attachments/assets/1ac5c2b8-a2fc-4bfb-9314-920f8e6f1540)
+- Features having more than 80% data "0" and is logically related to categorical features that have more than 80% data missing, are removed.
+- Feature Engineering mostly done with features having more than 70% data "0" or is related to them.
+- Features created to account for number of bathrooms and number of porch features houses have.
+- Flag/Binary features created to indicate presence of "OpenPorch", "WoodDeck" and "Basement Bathrooms" in the houses with "1" indicating presence and "0" for absence.
+- Features showing how latest remodeling has been done and the age of houses with respect to the sale year, have been created.
+- A feature for average basement finished area per quality of each of First finish and Second finish and a feature for average total area per quality of each of Basement and Garage have been created.
+- Feature indicating whether the living area has low quality finish or not has also been created.
+- Created a Merged One-Hot Encoding of "Condition1" and "Condition2" features as they were related because "Condition2" occur only after "Condition1" has value "Norm" otherwise "Condition2" will have mostly "Norm" as value.
+- Created count features denoting number of positive locations (Good for house value/price) and number of negative locations nearby houses.
 
-- Similarly, using "Cabin" feature containing alpha-numeric cabin name alloted to passsengers, a categorical feature has been created and named "cabin_type".
-- Different "cabin_type" values showing different "Survival" probabilities for passengers.
-![Image](https://github.com/user-attachments/assets/69534fd7-4756-4bac-9b37-20eae8cc6fef)
+## Handling Rare Categories:
+- No features were found having any rare category in test dataset that is not present in training dataset.
 
-- Using unique "Name" column, two informations have been extracted, family to which the passengers belongs to and their title and these informations presented under two new categorical features, "family" and "title" respectively.
-- Different "title" values showing different "Survival" probabilities for passengers.
-![Image](https://github.com/user-attachments/assets/e8a3bade-1abd-4766-9b28-827b2d43c0bb)
+![Image](https://github.com/user-attachments/assets/e59e3cc6-780a-4a49-a4c6-02803eefdfe4)
 
-- Created two new features; "family_size", using "SibSp" and "Parch" columns, and "family_count", containing count of all the families using "family" feature.
-- Created two new features; "Age_NA", showing positions of missing values in "Age" column, and "Age_mean", containing Mean Imputation of "Age" column as data was nearly symmetrical.
+## Permutation Importance:
+- Feature Importances obtained using Permutation Importance for each of the 4 encoding pairs mentioned in below section.
+- Almost all of the top 15 important features were used during feature engineering.
 
-## Handling Outliers:
-- Using boxplot, outliers detected in "Age", "Age_mean" and "Fare" features.
-![Image](https://github.com/user-attachments/assets/2de31ad2-62b5-4ed8-963f-f90229aab96e)
+![Image](https://github.com/user-attachments/assets/382376f8-0728-425f-b29f-569fe2121e4d)
 
-![Image](https://github.com/user-attachments/assets/7fc4a3ed-0cb1-4697-92c1-c24e0da6517d)
-
-![Image](https://github.com/user-attachments/assets/680c170a-83f0-4b38-8729-0d59816dd625)
-
-- Data distribution of "Age" and "Age_mean" is nearly symmetrical, so to deal with outliers, their values have been bounded within 3σ wrt mean.
-![Image](https://github.com/user-attachments/assets/38a660a0-15ff-485e-8ec6-9ee658936b04)
-![Image](https://github.com/user-attachments/assets/066da803-b1b7-49c1-8220-5968aa0489b9)
-
-- Since "Fare" has skewed data distribution, so its values have been bounded within 3IQR (Interquartile Range) from 75th and 25th percentile value.
-![Image](https://github.com/user-attachments/assets/c7a68ddc-a20a-47a9-93b2-05e35a20eafe)
+- Out of the 20 least important features, it is unsafe to remove features either created out of encoding or during feature engineering as they might have good correlation with other similar encoded/created features. Only "MoSold" and "Id" were the only base features present in this list. Also, "MoSold" has the 4th lowest feature importance, having weight of -6.089±45.594. It has very high standard deviation and negative mean, so can remove it.
 
 ## Feature Encoding and Modeling:
-- 4 types of Feature Encodings, "One-Hot Encoding", "Label Encoding", "Mean Encoding" and "Frequency Encoding" used.
-- 5 types of classifiers, "Random Forest Classifier", "Gradient Boosting Classifier", "KNeighbors Classifier", "Support Vector Classifier" and "XGBoost Classifier" used.
-- Using "Optuna" for "XGBoost" and manual "Grid Search" for rest of the classifiers, Hyperparameter tuning done  over 5 cross-validation folds for all the 20 Classifier-Encoding combinations to obtain the best performing model in terms of accuracy.
-- Final Hyperparameters of the best performing models obtained after further careful tuning of parameters to remove overfitting or underfitting as indicated by the differences in accuracy scores of the validation and test dataset according to scores on Kaggle's Public Leaderboard.
+- 4 types of Feature Encoding pairs used : 
+  + #### One-Hot Encoding + CatBoost Encoding
+  + #### One-Hot Encoding + Frequency Encoding
+  + #### Categorical + CatBoost Encoding
+  + #### Categorical + Frequency Encoding
+  For Low Cardinal Categorical Features -> One-Hot Encoding and Categorical.
+  
+  For High Cardinal Categorical Features -> CatBoost Encoding and Frequency Encoding 
+- 3 types of Regression Models used : 
+  + #### Random Forest Regression
+  + #### Gradient Boosting Regression
+  + #### XGBoost Regression
+- Using "Optuna" for "XGBoost" and manual "Grid Search" for rest of the regression models, Hyperparameter tuning done over 5 cross-validation folds for all the 12 Regressor-Encoding combinations to obtain the best performing models.
+- Final Hyperparameters of the best performing models obtained after further careful tuning of parameters to reduce leakage and improve generalization which reduce errors further on Kaggle's Public Leaderboard.
 ![Image](https://github.com/user-attachments/assets/57068e2c-f97c-4c33-a304-37906fcfaa69)
 ![Image](https://github.com/user-attachments/assets/50ff5fac-b457-4e7c-ab62-8696be4b0f28)
 ![Image](https://github.com/user-attachments/assets/37467fcf-e705-4407-b8b5-7acb89c201b7)
@@ -93,8 +96,8 @@
 ![Image](https://github.com/user-attachments/assets/8a3f0a16-1622-449d-a2f2-54b1778316df)
 
 ## Final Submission:
-- Below are the Top 5 best performing models out of 20 models.
+- Below are the Top 5 best performing models out of 12 models.
 ![Image](https://github.com/user-attachments/assets/c24f6284-8e34-44e7-8bfa-eb4e318502d4)
 
-- Final prediction obtained by taking mean of the top 3 best performing models and converting them to binary (0 & 1) by choosing 0.5 as threshold.
-- An accuracy of 0.80382 has been achieved by the model on Kaggle's Public Leaderboard.
+- Final prediction of "SalePrice" obtained by taking mean of predictions from the top 3 best performing models.
+- Lowest RMSE of  has been achieved on Kaggle's Public Leaderboard.
