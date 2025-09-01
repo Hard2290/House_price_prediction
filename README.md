@@ -3,7 +3,9 @@
 - This is a Regression ML problem.
 - The dataset contains 80 features of 1460 houses along with the prices at which these houses were sold mentioned under "SalePrice", which is our target feature. 
 
-## Lowest RMSE achieved on Kaggle Leaderboard - 0000000
+## Rank on Kaggle Public Leaderboard -  out of 5853
+
+## Lowest RMSE achieved on Kaggle Public Leaderboard - 0000000
 
 ## Problem Statement :
 - Build a model to predict the sales price for each house in test dataset.
